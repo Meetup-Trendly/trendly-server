@@ -34,7 +34,6 @@
     "express": "^4.16.2",
     "faker": "^4.1.0",
     "fs-extra": "^5.0.0",
-    "google-trends-api": "^4.3.0",
     "http-errors": "^1.6.2",
     "jsonwebtoken": "^8.1.0",
     "mongoose": "^5.0.0-rc0",

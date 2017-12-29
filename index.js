@@ -1,13 +1,7 @@
 'use strict';
 
-// require('dotenv').config();
+require('dotenv').config();
 
-// const server = require('./lib/server');
-const googleTrends = require('google-trends-api');
+const server = require('./lib/server');
 
-// server.start();
-
-googleTrends.interestOverTime({keyword: 'seattle'})
-  .then(results => {
-    console.log(results);
-  });
+server.start();
