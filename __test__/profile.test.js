@@ -24,7 +24,7 @@ describe('PROFILE router', () => {
           return superagent.post(`${__API_URL__}/profiles`)
             .set('Authorization', `Bearer ${accountMock.token}`)
             .send({
-              alias: 'mooshy',
+              name: 'mooshy',
               phoneNumber: '8675309',
               location: 'seattle',
             });
@@ -32,7 +32,7 @@ describe('PROFILE router', () => {
         .then(response => {
           expect(response.status).toEqual(200);
           expect(response.body.account).toEqual(accountMock.account._id.toString());
-          expect(response.body.alias).toEqual('mooshy');
+          expect(response.body.name).toEqual('mooshy');
           expect(response.body.phoneNumber).toEqual('8675309');
         });
     });
@@ -46,7 +46,7 @@ describe('PROFILE router', () => {
           return superagent.post(`${__API_URL__}/profiles`)
             .set('Authorization', `Bearer ${accountMock.token}`)
             .send({
-              alias: {},
+              name: {},
               phoneNumber: {},
             });
         })
@@ -62,7 +62,7 @@ describe('PROFILE router', () => {
           return superagent.post(`${__API_URL__}/profiles`)
             .set('Authorization', 'Bearer invalidtoken')
             .send({
-              alias: {},
+              name: {},
               phoneNumber: {},
             });
         })
@@ -86,7 +86,7 @@ describe('PROFILE router', () => {
         .then(response => {
           expect(response.status).toEqual(200);
           expect(response.body.account).toEqual(resultMock.accountMock.account._id.toString());
-          expect(response.body.alias).toEqual(resultMock.profile.alias);
+          expect(response.body.name).toEqual(resultMock.profile.name);
           expect(response.body.phoneNumber).toEqual(resultMock.profile.phoneNumber);
         });
     });

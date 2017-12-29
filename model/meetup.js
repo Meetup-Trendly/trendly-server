@@ -2,9 +2,9 @@
 
 const mongoose = require('mongoose');
 
-const trendSchema = mongoose.Schema ({
-  keyword: {type: String},
-  timestamp: {
+const meetupSchema = mongoose.Schema ({
+  location: {type: String},
+  profile: {
     type: Date,
     default: () => new Date(),
   },
@@ -14,4 +14,4 @@ const trendSchema = mongoose.Schema ({
   },
 });
 
-module.exports = mongoose.model('trend', trendSchema);
+module.exports = mongoose.model('meetup', meetupSchema);

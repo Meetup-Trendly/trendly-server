@@ -4,14 +4,19 @@ const {Router} = require('express');
 const jsonParser = require('body-parser').json();
 const httpErrors = require('http-errors');
 const Profile = require('../model/profile');
+const superagent = require('superagent');
 
 const bearerAuthMiddleware = require('../lib/bearer-auth-middleware');
 
 const profileRouter = module.exports = new Router();
 
 profileRouter.post('/profiles', bearerAuthMiddleware, jsonParser, (request, response, next) => {
-  if(!request.account && !request.phoneNumber && !request.location)
-    return next(new httpErrors(404, '__ERROR__ no account, location, or phonenumber given'));
+
+  // superagent.get('', () => {
+
+  // })
+  if(!request.account && !request.phoneNumber)
+    return next(new httpErrors(404, '__ERROR__ no account, or phonenumber given'));
 
   return new Profile ({
     ...request.body,
