@@ -26,7 +26,7 @@ describe('PROFILE router', () => {
             .send({
               alias: 'mooshy',
               phoneNumber: '8675309',
-              // location: '8675309',
+              location: 'seattle',
             });
         })
         .then(response => {

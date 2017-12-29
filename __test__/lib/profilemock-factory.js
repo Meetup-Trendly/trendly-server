@@ -16,6 +16,7 @@ profileMockFactory.create = () => {
       return new Profile ({
         alias: faker.name.firstName(),
         phoneNumber: faker.phone.phoneNumber(),
+        location: `${faker.address.latitude()}.${faker.address.longitude()}`,
 
         account: accountMock.account._id,
       }).save();
