@@ -27,7 +27,8 @@ profileRouter.post('/profiles', bearerAuthMiddleware, jsonParser, (request, resp
       }).save()
         .then(profile => response.json(profile))
         .catch(next);
-    });
+    })
+    .catch(next);
 });
 
 

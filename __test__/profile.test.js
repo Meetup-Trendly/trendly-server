@@ -24,15 +24,14 @@ describe('PROFILE router', () => {
           return superagent.post(`${__API_URL__}/profiles`)
             .set('Authorization', `Bearer ${accountMock.token}`)
             .send({
-              name: 'mooshy',
               phoneNumber: '8675309',
-              location: 'seattle',
+              meetupMemberId: '240616151', // wanderly_wagon
             });
         })
         .then(response => {
           expect(response.status).toEqual(200);
           expect(response.body.account).toEqual(accountMock.account._id.toString());
-          expect(response.body.name).toEqual('mooshy');
+          expect(response.body.name).toEqual('wanderly_wagon');
           expect(response.body.phoneNumber).toEqual('8675309');
         });
     });
