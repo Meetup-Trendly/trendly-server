@@ -842,3 +842,19 @@
 {"level":"verbose","message":"Server is listening on port: 3000","timestamp":"2018-01-02T19:58:43.296Z"}
 {"level":"verbose","message":"Processing: POST On: /sms-profile","timestamp":"2018-01-02T19:58:43.392Z"}
 {"level":"info","message":"Server is shutting down","timestamp":"2018-01-02T19:58:43.644Z"}
+{"level":"verbose","message":"Server is listening on port: 3000","timestamp":"2018-01-02T21:53:33.742Z"}
+{"level":"verbose","message":"Processing: POST On: /sms-profile","timestamp":"2018-01-02T21:53:33.829Z"}
+{"level":"verbose","message":"Processing: POST On: /sms-profile","timestamp":"2018-01-02T21:53:34.298Z"}
+{"level":"verbose","message":"Processing: POST On: /sms-profile","timestamp":"2018-01-02T21:53:34.784Z"}
+{"level":"info","message":"__MIDDLEWARE_IS_HANDLING_ERROR__ ","timestamp":"2018-01-02T21:53:34.919Z"}
+{"code":11000,"index":0,"errmsg":"E11000 duplicate key error collection: testing.smsProfile index: meetupMemberId_1 dup key: { : 240616151 }","op":{"meetups":["PyDataDublin","Dublin-Data-Science","DataScientistsIreland"],"categories":[],"_id":"5a4bff5e1bac5f2f389acd66","meetupMemberId":240616151,"phoneNumber":"8675309","__v":0}}
+{"level":"info","message":"Responding with a 409 status code - duplicate key","timestamp":"2018-01-02T21:53:34.920Z"}
+{"level":"info","message":"Server is shutting down","timestamp":"2018-01-02T21:53:34.924Z"}
+{"level":"verbose","message":"Server is listening on port: 3000","timestamp":"2018-01-02T21:54:04.901Z"}
+{"level":"verbose","message":"Processing: POST On: /sms-profile","timestamp":"2018-01-02T21:54:04.999Z"}
+{"level":"verbose","message":"Processing: POST On: /sms-profile","timestamp":"2018-01-02T21:54:05.208Z"}
+{"level":"verbose","message":"Processing: POST On: /sms-profile","timestamp":"2018-01-02T21:54:05.374Z"}
+{"level":"info","message":"__MIDDLEWARE_IS_HANDLING_ERROR__ ","timestamp":"2018-01-02T21:54:05.513Z"}
+{"code":11000,"index":0,"errmsg":"E11000 duplicate key error collection: testing.smsProfile index: meetupMemberId_1 dup key: { : 240616151 }","op":{"meetups":["PyDataDublin","Dublin-Data-Science","DataScientistsIreland"],"categories":[],"_id":"5a4bff7d0ed8802f83a1d83d","meetupMemberId":240616151,"phoneNumber":"8675309","__v":0}}
+{"level":"info","message":"Responding with a 409 status code - duplicate key","timestamp":"2018-01-02T21:54:05.515Z"}
+{"level":"info","message":"Server is shutting down","timestamp":"2018-01-02T21:54:05.521Z"}
