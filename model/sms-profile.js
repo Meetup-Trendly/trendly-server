@@ -5,13 +5,19 @@ const mongoose = require('mongoose');
 const smsProfileSchema = mongoose.Schema ({
   meetupMemberId: {
     type: Number,
+    unique: true,
+    required: true,
   },
   phoneNumber: {
     type: String,
     unique: true,
+    required: true,
+  },
+  meetups: {
+    type: Array, // use group url name
   },
   categories: [{
-    type: String, // use group url name
+    type: String,
   }],
 });
 
