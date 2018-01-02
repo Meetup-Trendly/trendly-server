@@ -15,6 +15,7 @@ const smsProfileRouter = module.exports = new Router();
 smsProfileRouter.post('/sms-profile', jsonParser, (request, response, next) => {
   // meetupMemberId = request.body.Body
   // phoneNumber = request.body.From
+  console.log('are we getting to the router?');
   const userInput = request.body.Body;
   const phoneNumber = request.body.From;
   const twiml = new MessagingResponse();
@@ -26,7 +27,7 @@ smsProfileRouter.post('/sms-profile', jsonParser, (request, response, next) => {
   if (isANumber(userInput)) {
     // assume member id
     const meetupMemberId = userInput;
-    const API_URL = `https://api.meetup.com/groups?${meetupMemberId}&key=${process.env.API_KEY}`;
+    const API_URL = `https://api.meetup.com/groups?member_id=${meetupMemberId}&key=${process.env.API_KEY}`;
     return superagent.get(API_URL)
       .then(response => {
         return response.body;
@@ -49,6 +50,7 @@ smsProfileRouter.post('/sms-profile', jsonParser, (request, response, next) => {
               Here's a list of commands: _______`);
             response.writeHead(200, {'Content-Type': 'text/xml'});
             response.end(twiml.toString());
+            // response.send(`Congratulations ${meetupMemberId}! You are all signed up`);
           })
           .catch(next);
       });
