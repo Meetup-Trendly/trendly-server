@@ -13,20 +13,21 @@ const log = require('../lib/logger');
 const smsProfileRouter = module.exports = new Router();
 
 smsProfileRouter.post('/sms-profile', jsonParser, (request, response, next) => {
-  // meetupMemberId = request.body.Body
-  // phoneNumber = request.body.From
+  if(!request.body.Body || !request.body.From) {
+    return next(new httpErrors(404, 'Please provide a text message and a proper phone number'));
+  }
   const userInput = request.body.Body;
   const phoneNumber = request.body.From;
   const twiml = new MessagingResponse();
 
   const isANumber = str => {
-    return !/\D/.test(str);
+    return /\d/.test(str);
   };
 
   if (isANumber(userInput)) {
     // assume member id
     const meetupMemberId = userInput;
-    const API_URL = `https://api.meetup.com/groups?${meetupMemberId}&key=${process.env.API_KEY}`;
+    const API_URL = `https://api.meetup.com/groups?member_id=${meetupMemberId}&key=${process.env.API_KEY}`;
     return superagent.get(API_URL)
       .then(response => {
         return response.body;
@@ -57,14 +58,16 @@ smsProfileRouter.post('/sms-profile', jsonParser, (request, response, next) => {
   } else if (userInput.toLowerCase() === 'my groups') {
     smsProfile.find({phoneNumber})
       .then(smsProfile => {
-        if (!smsProfile) {
+        if (smsProfile.length === 0) {
+          console.log('sms profile', smsProfile);
           twiml.message(`No profile found with that phone number`);
-          response.writeHead(200, {'Content-Type': 'text/xml'});
+          response.writeHead(404, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
+          return;
           
-          return new httpErrors(404, 'No profile found with that phone number');
+          // return next(new httpErrors(404, 'No profile found with that phone number'));
         }
-        twiml.message(`Your groups: ${smsProfile.groups}`);
+        twiml.message(`Your groups: ${smsProfile[0].meetups}`);
         response.writeHead(200, {'Content-Type': 'text/xml'});
         response.end(twiml.toString());
       })
