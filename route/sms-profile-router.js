@@ -15,6 +15,10 @@ const smsProfileRouter = module.exports = new Router();
 smsProfileRouter.post('/sms-profile', jsonParser, (request, response, next) => {
   // meetupMemberId = request.body.Body
   // phoneNumber = request.body.From
+  if(!request.body.Body || !request.body.From) {
+    console.log(request.body.Body);
+    return next(new httpErrors(404, 'Please provide a text message and a proper phone number'));
+  }
   const userInput = request.body.Body;
   const phoneNumber = request.body.From;
   const twiml = new MessagingResponse();

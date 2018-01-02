@@ -40,10 +40,6 @@ describe('sms-profile.js', () => {
 
       return superagent.post(`${__API_URL__}/sms-profile`)
         .send(phone)
-        .then(response => {
-          expect(response.status).toEqual(200);
-          expect(response.text).toContain(`Congratulations, ${phone.Body}! You are all signed up`);
-        })
         .then(() => {
           return superagent.post(`${__API_URL__}/sms-profile`)
             .send(phone)
@@ -51,6 +47,19 @@ describe('sms-profile.js', () => {
             .catch(response => {
               expect(response.status).toEqual(409);
             });
+        });
+    });
+
+    test('testing that a 404 error will throw if phone number or member id are not provided', () => {
+      const phone = {
+        Body: '240616151', // wanderly_wagon
+      };
+
+      return superagent.post(`${__API_URL__}/sms-profile`)
+        .send(phone)
+        .then(Promise.reject)
+        .catch(response => {
+          expect(response.status).toEqual(404);
         });
     });
   });
