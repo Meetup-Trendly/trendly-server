@@ -13,18 +13,13 @@ const profileSchema = mongoose.Schema ({
     type: String,
     unique: true,
   },
-  email: {
-    type: String,
-    unique: true,
-  },
   account: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     unique: true,
   },
   categories: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'categorie',
+    type: String, // use group url name
   }],
 });
 
