@@ -5,7 +5,7 @@ const bodyParser = require('body-parser').urlencoded({extended:false});
 const httpErrors = require('http-errors');
 const superagent = require('superagent');
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
-const twiml = new MessagingResponse();
+
 
 const smsProfile = require('../model/sms-profile');
 const log = require('../lib/logger');
@@ -13,6 +13,7 @@ const log = require('../lib/logger');
 const smsProfileRouter = module.exports = new Router();
 
 smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
+  const twiml = new MessagingResponse();
   if(!request.body.Body || !request.body.From) {
     return next(new httpErrors(404, 'Please provide a text message and a proper phone number'));
   }
@@ -55,6 +56,7 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
       });
   } else if (userInput.toLowerCase() === 'update me') {
     // send update to user
+    const ONE_WEEK = 604800000;
     console.log('IN THE UPDATE');
     smsProfile.find({phoneNumber})
       .then(smsProfile => {
@@ -64,39 +66,39 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
           response.end(twiml.toString());
           return;
         }
-        let groups = [];
-        smsProfile[0].meetups.forEach(each => {
-          Promise.all([
-            superagent.get(`https://api.meetup.com/seattlejs/events?key=${process.env.API_KEY}`)
-              .then(response => {
-                return response.body;
-              })
-              .then(eventObject => { //array
-                // console.log('-------------------------------------', eventObject);
-                let inAWeek = Date.now() + 604800000;
-                let filteredEvents = eventObject.filter(event => {
-                  return event.time < inAWeek;
-                });
-                // console.log(filteredEvents);
-                groups.push(filteredEvents);
-              }),
-          ]);
+
+        // let groups = [];
+
+
+        // TODO - mattL - Refactor, this works for one group
+        return smsProfile[0].meetups.forEach(each => {
+          console.log(each);
+          superagent.get(`https://api.meetup.com/${each}/events?key=${process.env.API_KEY}`)
+            .then(response => {
+              return response.body;
+            })
+            .then(eventsArray => { //array
+              let inAWeek = Date.now() + ONE_WEEK;
+              let filteredEvents = eventsArray.filter(event => {
+                return event.time > inAWeek;
+              });
+              return filteredEvents.reduce((acc, each) => {
+                return `${acc}${each.name}\n@${each.local_time}\non:${each.local_date}\n\n`;
+              }, '');
+            })
+            .then(filteredEvents => {
+              if (filteredEvents.length === 0) {
+                twiml.message('There are no upcoming events this week!');
+                response.writeHead(200, {'Content-Type': 'text/xml'});
+                response.end(twiml.toString());
+                return;  
+              }
+              twiml.message(filteredEvents);
+              response.writeHead(200, {'Content-Type': 'text/xml'});
+              response.end(twiml.toString());
+              return;
+            });
         });
-        return groups;
-      })
-      .then(groupsArray => {
-        if (groupsArray.length === 0) {
-          console.log('NO GROUPS');
-          twiml.message('There are no upcoming events this week!');
-          response.writeHead(200, {'Content-Type': 'text/xml'});
-          response.end(twiml.toString());
-          return;  
-        }
-        console.log('GROUPSPS',groupsArray);
-        twiml.message(groupsArray);
-        response.writeHead(200, {'Content-Type': 'text/xml'});
-        response.end(twiml.toString());
-        return;
       });
 
   } else if (userInput.toLowerCase() === 'my groups') {
