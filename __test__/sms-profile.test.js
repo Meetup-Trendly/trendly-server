@@ -24,7 +24,7 @@ describe('POST /sms-profile', () => {
         .send(phone)
         .then(response => {
           expect(response.status).toEqual(200);
-          expect(response.text).toContain(`Congratulations, 240616151! You are all signed up`);
+          expect(response.text).toContain(`Congratulations, wanderly_wagon!`);
         });
     });
 

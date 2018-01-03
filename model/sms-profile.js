@@ -8,6 +8,9 @@ const smsProfileSchema = mongoose.Schema ({
     unique: true,
     required: true,
   },
+  meetupMemberName: {
+    type: String,
+  },
   phoneNumber: {
     type: String,
     unique: true,
