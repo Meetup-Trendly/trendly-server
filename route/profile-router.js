@@ -6,7 +6,7 @@ const httpErrors = require('http-errors');
 const Profile = require('../model/profile');
 const superagent = require('superagent');
 
-const bearerAuthMiddleware = require('../lib/bearer-auth-middleware');
+const bearerAuthMiddleware = require('../lib/middleware/bearer-auth-middleware');
 
 const profileRouter = module.exports = new Router();
 
