@@ -18,7 +18,7 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
     return next(new httpErrors(404, 'Please provide a text message and a proper phone number'));
   }
 
-  const userInput = request.body.Body;
+  const userInput = request.body.Body.toLowerCase().trim();
   const phoneNumber = request.body.From;
 
   const isANumber = str => {
@@ -68,7 +68,7 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
           .catch(next);
       });
 
-  } else if (userInput.toLowerCase() === 'update me') {
+  } else if (userInput === 'update me') {
     const ONE_WEEK = 604800000;
     smsProfile.find({phoneNumber})
       .then(smsProfile => {
@@ -109,7 +109,7 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
       })
       .catch(next);
 
-  } else if (userInput.toLowerCase() === 'my groups') {
+  } else if (userInput === 'my groups') {
     smsProfile.find({phoneNumber})
       .then(smsProfile => {
         if (smsProfile.length === 0) {
