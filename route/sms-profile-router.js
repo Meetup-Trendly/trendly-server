@@ -25,8 +25,7 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
     return /\d/.test(str);
   };
 
-  if (isANumber(userInput)) {
-    // assume member id
+  if (isANumber(userInput)) { // assume member id
     const meetupMemberId = userInput;
     const API_URL = `https://api.meetup.com/groups?member_id=${meetupMemberId}&key=${process.env.API_KEY}`;
     return superagent.get(API_URL)
@@ -54,10 +53,9 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
           })
           .catch(next);
       });
+
   } else if (userInput.toLowerCase() === 'update me') {
-    // send update to user
     const ONE_WEEK = 604800000;
-    console.log('IN THE UPDATE');
     smsProfile.find({phoneNumber})
       .then(smsProfile => {
         if (smsProfile.length === 0) {
@@ -67,17 +65,12 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
           return;
         }
 
-        // let groups = [];
-
-
-        // TODO - mattL - Refactor, this works for one group
         return smsProfile[0].meetups.forEach(each => {
-          console.log(each);
           superagent.get(`https://api.meetup.com/${each}/events?key=${process.env.API_KEY}`)
             .then(response => {
               return response.body;
             })
-            .then(eventsArray => { //array
+            .then(eventsArray => {
               let aWeeksTime = Date.now() + ONE_WEEK;
               let filteredEvents = eventsArray.filter(event => {
                 return event.time < aWeeksTime;

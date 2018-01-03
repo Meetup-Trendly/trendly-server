@@ -1,6 +1,6 @@
 'use strict';
 
-require('./lib/setup');
+require('dotenv').config();
 
 const superagent = require('superagent');
 const server = require('../lib/server');

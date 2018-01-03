@@ -1,6 +1,6 @@
 'use strict';
 
-require('./lib/setup');
+require('dotenv').config();
 
 const superagent = require('superagent');
 const server = require('../lib/server');
@@ -96,7 +96,7 @@ describe('POST /sms-profile', () => {
      
       return new smsProfile({
         meetupMemberId: 240616151,
-        phoneNumber: 8675309,
+        phoneNumber: '8675309',
         meetups: ['seattlejs', 'seattlejshackers'],
         // meetups: ['PyDataDublin'], // PyDataDublin has no group meetups
       }).save()
@@ -105,8 +105,6 @@ describe('POST /sms-profile', () => {
             .send(updateMe)
             .then(response => {
               expect(response.status).toEqual(200);
-              console.log(response.text);
-              expect(response.text).toContain('There are no upcoming events this week!');
             });
         });
     });
