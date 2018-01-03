@@ -6,22 +6,8 @@ const httpErrors = require('http-errors');
 const superagent = require('superagent');
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = require('twilio')(accountSid, authToken);
 
 const smsProfile = require('../model/sms-profile');
-
-const createMessage = (phoneNumber,message) => {
-  client.messages.create({
-    to: phoneNumber,
-    from: '+12065651148',
-    body: message,
-  })
-    .then(message => console.log(message.sid));
-};
-
-
 
 const log = require('../lib/logger');
 
