@@ -5,7 +5,7 @@ const bodyParser = require('body-parser').urlencoded({extended:false});
 const httpErrors = require('http-errors');
 const superagent = require('superagent');
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
-
+const sms = require('../lib/sms');
 
 const smsProfile = require('../model/sms-profile');
 const log = require('../lib/logger');
@@ -78,9 +78,9 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
               return response.body;
             })
             .then(eventsArray => { //array
-              let inAWeek = Date.now() + ONE_WEEK;
+              let aWeeksTime = Date.now() + ONE_WEEK;
               let filteredEvents = eventsArray.filter(event => {
-                return event.time > inAWeek;
+                return event.time < aWeeksTime;
               });
               return filteredEvents.reduce((acc, each) => {
                 return `${acc}${each.name}\n@${each.local_time}\non:${each.local_date}\n\n`;
@@ -88,18 +88,19 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
             })
             .then(filteredEvents => {
               if (filteredEvents.length === 0) {
-                twiml.message('There are no upcoming events this week!');
-                response.writeHead(200, {'Content-Type': 'text/xml'});
-                response.end(twiml.toString());
+                sms.sendMessage(`There are no upcoming events this week for ${each}`, phoneNumber);
                 return;  
               }
-              twiml.message(filteredEvents);
-              response.writeHead(200, {'Content-Type': 'text/xml'});
-              response.end(twiml.toString());
+              sms.sendMessage(filteredEvents, phoneNumber);
               return;
-            });
+            })
+            .catch(next);
         });
-      });
+      })
+      .then(() => {
+        response.end();
+      })
+      .catch(next);
 
   } else if (userInput.toLowerCase() === 'my groups') {
     smsProfile.find({phoneNumber})

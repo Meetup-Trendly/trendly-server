@@ -97,8 +97,8 @@ describe('POST /sms-profile', () => {
       return new smsProfile({
         meetupMemberId: 240616151,
         phoneNumber: 8675309,
-        // meetups: ['seattlejs', 'seattlejshackers'],
-        meetups: ['PyDataDublin'], // PyDataDublin has no group meetups
+        meetups: ['seattlejs', 'seattlejshackers'],
+        // meetups: ['PyDataDublin'], // PyDataDublin has no group meetups
       }).save()
         .then(() => {
           return superagent.post(`${__API_URL__}/sms-profile`)
