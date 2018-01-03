@@ -125,8 +125,25 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
       .catch(next);
 
   } else {
-    // category to be subscribed to
-    log('info', `User Input: ${userInput}`);
-    return;
+    smsProfile.findOne({phoneNumber})
+      .then(foundProfile => {
+        if (!foundProfile) {
+          twiml.message(`Welcome to meetup-trendly notifications!
+          If you'd like to sign up, please reply with your meetup User ID
+          which can be found at (https://www.meetup.com/account/)`);
+          response.writeHead(200, {'Content-Type': 'text/xml'});
+          response.end(twiml.toString());
+          return;
+        } else {
+          twiml.message(`List of Commands:
+          'my groups' - to see a list of your meetup groups
+          'update me' - to get upcoming events
+          'stop' - to opt out of text notifications`);
+          response.writeHead(200, {'Content-Type': 'text/xml'});
+          response.end(twiml.toString());
+          return;
+        }
+      })
+      .catch(next);
   }
 });
