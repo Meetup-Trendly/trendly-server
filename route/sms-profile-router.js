@@ -20,13 +20,15 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
 
   const userInput = request.body.Body.toLowerCase().trim();
   const phoneNumber = request.body.From;
+  log('info' , `userInput= ${userInput}`);
+  log('info' , `phoneNumber= ${phoneNumber}`);
 
   const isANumber = str => {
-    return /\d/.test(str);
+    return /id: ?(\d+)$/.test(str);
   };
 
   if (isANumber(userInput)) { // assume member id
-    const meetupMemberId = userInput;
+    const meetupMemberId = userInput.match(/id: ?(\d+)$/)[1];
     const API_URL = `https://api.meetup.com/groups?member_id=${meetupMemberId}&key=${process.env.API_KEY}`;
     const API_GET_MEMBER_PROFILE = `https://api.meetup.com/members/${meetupMemberId}?key=${process.env.API_KEY}&?fields=groups?%22`;
     return superagent.get(API_URL)
@@ -129,7 +131,8 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
       .then(foundProfile => {
         if (!foundProfile) {
           twiml.message(`Welcome to meetup-trendly notifications!
-          If you'd like to sign up, please reply with your meetup User ID
+          If you'd like to sign up, please send a text message reply with your meetup user ID in the following format
+          id: 123456789
           which can be found at (https://www.meetup.com/account/)`);
           response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
