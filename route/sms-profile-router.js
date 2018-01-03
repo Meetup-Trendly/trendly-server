@@ -56,12 +56,12 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
               meetups: groups,
             }).save()
               .then(() => {
-                twiml.message(`Congratulations, ${newMeetupObject.name}! 
-                You are all signed up for meetup notifications with #${phoneNumber}
-                Here's a list of commands, text:
-                'my groups' - to see a list of your meetup groups
-                'update me' - to get upcoming events
-                'stop' - to opt out of text notifications`);
+                twiml.message(`Congratulations, ${newMeetupObject.name}!
+You are all signed up for meetup notifications with #${phoneNumber}
+Here's a list of commands, text:
+'my groups' - to see a list of your meetup groups
+'update me' - to get upcoming events
+'stop' - to opt out of text notifications`);
                 response.writeHead(200, {'Content-Type': 'text/xml'});
                 response.end(twiml.toString());
               })
@@ -131,17 +131,18 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
       .then(foundProfile => {
         if (!foundProfile) {
           twiml.message(`Welcome to meetup-trendly notifications!
-          If you'd like to sign up, please send a text message reply with your meetup user ID in the following format
-          id: 123456789
-          which can be found at (https://www.meetup.com/account/)`);
+If you'd like to sign up, 
+please send a text message reply with your meetup user ID in the following format
+id: 123456789
+which can be found at (https://www.meetup.com/account/)`);
           response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
         } else {
           twiml.message(`List of Commands:
-          'my groups' - to see a list of your meetup groups
-          'update me' - to get upcoming events
-          'stop' - to opt out of text notifications`);
+'my groups' - to see a list of your meetup groups
+'update me' - to get upcoming events
+'stop' - to opt out of text notifications`);
           response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
