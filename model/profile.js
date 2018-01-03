@@ -18,7 +18,7 @@ const profileSchema = mongoose.Schema ({
     required: true,
     unique: true,
   },
-  categories: [{
+  meetups: [{
     type: String, // use group url name
   }],
 });
