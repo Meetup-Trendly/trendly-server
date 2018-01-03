@@ -1,7 +1,7 @@
 'use strict';
 
 const { Router } = require('express');
-const jsonParser = require('body-parser');
+const bodyParser = require('body-parser').urlencoded({extended:false});
 const httpErrors = require('http-errors');
 const superagent = require('superagent');
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
@@ -27,16 +27,17 @@ const log = require('../lib/logger');
 
 const smsProfileRouter = module.exports = new Router();
 
-smsProfileRouter.post('/sms-profile', jsonParser, (request, response, next) => {
+smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
   const twiml = new MessagingResponse();
-  console.log(request.body.From);
-  // twiml.message(`Congratulations, you are all signed up \n
-  //             Here's a list of commands: _______`);
-  createMessage(request.body.From, 'Congrats you are all signed up');
-  console.log(request.body.From);
-  return;
+  console.log(request);
+  twiml.message(`Congratulations, you are all signed up \n
+              Here's a list of commands: ${request.body.From}`);
+  // createMessage(request.body.From, 'Congrats you are all signed up');
+  // console.log(request.body.From);
+  // return;
   response.writeHead(200, {'Content-Type': 'text/xml'});
   response.end(twiml.toString());
+
 
   if(!request.body.Body || !request.body.From) {
     return next(new httpErrors(404, 'Please provide a text message and a proper phone number'));
