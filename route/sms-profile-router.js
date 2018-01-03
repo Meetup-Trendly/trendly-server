@@ -28,28 +28,42 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
   if (isANumber(userInput)) { // assume member id
     const meetupMemberId = userInput;
     const API_URL = `https://api.meetup.com/groups?member_id=${meetupMemberId}&key=${process.env.API_KEY}`;
+    const API_GET_MEMBER_PROFILE = `https://api.meetup.com/members/${meetupMemberId}?key=${process.env.API_KEY}&?fields=groups?%22`;
     return superagent.get(API_URL)
       .then(response => {
         return response.body;
       })
       .then(meetupObject => {
-        const results = meetupObject.results;
-        const groups = [];
-
-        results.forEach(result => {
-          groups.push(result.group_urlname);
-        });
-
-        return new smsProfile ({
-          meetupMemberId,
-          phoneNumber,
-          meetups: groups,
-        }).save()
-          .then(() => {
-            twiml.message(`Congratulations, ${meetupMemberId}! You are all signed up \n from number ${phoneNumber}
-              Here's a list of commands: _______`);
-            response.writeHead(200, {'Content-Type': 'text/xml'});
-            response.end(twiml.toString());
+        return superagent.get(API_GET_MEMBER_PROFILE)
+          .then(memberAccount => {
+            meetupObject.name = memberAccount.body.name;
+            return meetupObject;
+          })
+          .then(newMeetupObject => {
+            const results = newMeetupObject.results;
+            const groups = [];
+    
+            results.forEach(result => {
+              groups.push(result.group_urlname);
+            });
+    
+            return new smsProfile ({
+              meetupMemberId,
+              meetupMemberName: newMeetupObject.name,
+              phoneNumber,
+              meetups: groups,
+            }).save()
+              .then(() => {
+                twiml.message(`Congratulations, ${newMeetupObject.name}! 
+                You are all signed up for meetup notifications with #${phoneNumber}
+                Here's a list of commands, text:
+                'my groups' - to see a list of your meetup groups
+                'update me' - to get upcoming events
+                'stop' - to opt out of text notifications`);
+                response.writeHead(200, {'Content-Type': 'text/xml'});
+                response.end(twiml.toString());
+              })
+              .catch(next);
           })
           .catch(next);
       });
@@ -80,7 +94,6 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
               }, '');
             })
             .then(filteredEvents => {
-              console.log(filteredEvents);
               if (filteredEvents.length === 0) {
                 sms.sendMessage(`There are no upcoming events this week for ${each}`, phoneNumber);
                 return;  
