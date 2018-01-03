@@ -76,10 +76,11 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
                 return event.time < aWeeksTime;
               });
               return filteredEvents.reduce((acc, each) => {
-                return `${acc}${each.name}\n@${each.local_time}\non:${each.local_date}\n\n`;
+                return `${acc}${each.group.name}: ${each.name}\n${new Date(each.time).toString().match(/\D+ \d+ \d+/)[0]}\n@${each.local_time}\n\n`;
               }, '');
             })
             .then(filteredEvents => {
+              console.log(filteredEvents);
               if (filteredEvents.length === 0) {
                 sms.sendMessage(`There are no upcoming events this week for ${each}`, phoneNumber);
                 return;  
