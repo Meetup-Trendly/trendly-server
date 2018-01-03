@@ -72,6 +72,7 @@ describe('POST /sms-profile', () => {
             .send(getGroups)
             .then(response => {
               expect(response.status).toEqual(200);
+              console.log(response.text);
               expect(response.text).toContain('Your groups');
             });
         });
