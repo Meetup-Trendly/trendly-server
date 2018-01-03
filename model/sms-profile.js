@@ -5,8 +5,8 @@ const mongoose = require('mongoose');
 const smsProfileSchema = mongoose.Schema ({
   meetupMemberId: {
     type: Number,
-    unique: true,
     required: true,
+    // unique: true,
   },
   meetupMemberName: {
     type: String,
