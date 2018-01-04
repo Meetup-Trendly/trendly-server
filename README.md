@@ -13,6 +13,8 @@ Trendly is a RESTful API built with a (Hypertext Transfer Protocol) HTTP server 
 
 ### Build
 
+![Trendly FlowChart](./assets/Trendly-flowchart.png)
+
 #### `Staging` : [![Build Status](https://travis-ci.org/Meetup-Trendly/trendly-server.svg?branch=staging)](https://travis-ci.org/Meetup-Trendly/trendly-server)
 
 #### `Master` : [![Build Status](https://travis-ci.org/Meetup-Trendly/trendly-server.svg?branch=master)](https://travis-ci.org/Meetup-Trendly/trendly-server)
