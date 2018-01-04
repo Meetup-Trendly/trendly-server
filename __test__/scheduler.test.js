@@ -1,6 +1,5 @@
 'use strict';
 
-
 require('dotenv').config();
 
 const server = require('../lib/server');
@@ -11,8 +10,11 @@ describe('scheduler.js', () => {
   beforeAll(server.start);
   afterAll(server.stop);
 
-  describe('eventsNextDay', () => {
-    test('first', () => {
+  describe('updating all groups', () => {
+    afterAll(() => {
+      return smsProfile.remove({});
+    });
+    test('testing that smsProfile is being saved to the database', () => {
       return new smsProfile({
         meetupMemberId: 240616151,
         meetupMemberName: 'wanderly_wagon',
@@ -26,20 +28,15 @@ describe('scheduler.js', () => {
             });
         });
     });
-    describe('updating all groups', () => {
-      test('second', () => {
-        Promise.all([
-          new Promise(resolve => {
-            resolve(scheduler.updateAllGroups());
-          }),
-        ])
-          .then(() => {
-            return smsProfile.findOne({phoneNumber: '8675309'})
-              .then(foundSMSProfile => {
-                console.log(foundSMSProfile);
-                expect(foundSMSProfile.meetups).toEqual([]);
-                expect(true).toBeFalsy();
-              });
+    describe('testing that the saved sms profile is updated', () => {
+      test('testing that the saved sms profile is updated', () => {
+
+        return smsProfile.findOne({phoneNumber: '8675309'})
+          .then(foundSMSProfile => {
+            scheduler.updateAllGroups();
+            console.log(foundSMSProfile);
+            expect(foundSMSProfile.meetups).not.toHaveLength(0);
+            expect(true).toBeFalsy();
           });
       });
     });
