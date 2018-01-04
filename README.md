@@ -201,7 +201,7 @@ Standard JavaScript with ES6
 * Amazon Web Services
 * TravisCI
 * Heroku
-* Meetup
+* node-schedule
 
 ---
 
