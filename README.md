@@ -28,25 +28,38 @@ Trendly is built with a (Hypertext Transfer Protocol) HTTP server and basic and 
 
 #### To sign up for Twilio Meetup SMS notifications:
 
-* Send a text message to <+12608675309> with your Meetup User ID in the following format: <id: 123456789>
+* Send a text message to `+1 (206) 565-1148` with your Meetup User ID in the following format: `123456789`
 * If you do not know your Meetup User ID, you can find it by visiting: https://www.meetup.com/account/
 
 #### To use the Twilio Meetup SMS interface, you can issue the following commands:
 
-* Send a text message to <+12608675309> with the command: `<my groups>` to see a list of your Meetup groups.
-* Send a text message to <+12608675309> with the command: `<update me>` to be notified of any events that your Meetup groups are having during the next week.
-* Send a text message to <+12608675309> with the command: `<stop>` to opt out of text notifications.
+* Send a text message to `+1 (206) 565-1148` with the command: `'my groups'` to see a list of your Meetup groups.
+* Send a text message to `+1 (206) 565-1148` with the command: `'update me'` to be notified of any events that your Meetup groups are having during the next week.
+* Send a text message to `+1 (206) 565-1148` with the command: `'stop'` to opt out of text notifications.
 
 ---
 ### Developer Tools:
 
 * Step 1. Fork and Clone the Repository.
 * Step 2. `npm install`.
-* Step 3. start MongoDB by calling `npm run dbon`.
-* Step 4. to test the API, open a second terminal window and run the command `npm run test`.
-* Step 5. If you would like to start the server, you can run the command `npm run start`.
-* Step 6. If you would like to contribute to the Repo, please open a Pull Request and we will review it
-* Step 7. If you find a bug - please report it by opening up an issue in this git repository.
+* Step 3. touch a .env file and add the following environment variables:
+```  
+  PORT=3000
+  MONGODB_URI=mongodb://localhost/testing
+  CLOUD_SALT='AddYourOwnSecretKey'
+  API_KEY=AddYourOwnMeetupAPIKey
+  TWILIO_ACCOUNT_SID=AddYourOwnTwilioAccountSecretID
+  TWILIO_AUTH_TOKEN=AddYourOwnTwilioAuthToken
+  TWILIO_NUMBER=2065651148
+``` 
+* Step 4. start MongoDB by calling `npm run dbon`.
+* Step 5. to test the API, open a second terminal window and run the command `npm run test`.
+* Step 6. If you would like to start the server, you can run the command `npm run start`.
+
+### If you would like to contribute:
+
+* PR: If you would like to contribute to the Repo, please open a Pull Request and we will review it
+* Bug Reporting: If you find a bug - please report it by opening up an issue in this git repository.
 
 ---
 ### Build
