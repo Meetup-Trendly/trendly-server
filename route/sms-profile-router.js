@@ -132,7 +132,10 @@ Here's a list of commands, text:
           response.end(twiml.toString());
           return;
         }
-        twiml.message(`Your groups: ${smsProfile[0].meetups}`);
+        let message = smsProfile[0].meetups.reduce((accumulator, eachMeetup) => {
+          return `${accumulator}${eachMeetup}\n`;
+        }, '');
+        twiml.message(message);
         response.writeHead(200, {'Content-Type': 'text/xml'});
         response.end(twiml.toString());
         return;
