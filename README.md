@@ -50,7 +50,7 @@ Trendly is built with a (Hypertext Transfer Protocol) HTTP server and basic and 
   API_KEY=AddYourOwnMeetupAPIKey
   TWILIO_ACCOUNT_SID=AddYourOwnTwilioAccountSecretID
   TWILIO_AUTH_TOKEN=AddYourOwnTwilioAuthToken
-  TWILIO_NUMBER=2065651148
+  TWILIO_NUMBER=AddYourOwnTwilioNumber
 ``` 
 * Step 4. start MongoDB by calling `npm run dbon`.
 * Step 5. to test the API, open a second terminal window and run the command `npm run test`.
