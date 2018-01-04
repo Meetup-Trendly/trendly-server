@@ -18,7 +18,7 @@ describe('POST /sms-profile', () => {
   describe('text memberID to sign up', () => {
     test('testing that a text from a phone number should create an sms profile and return a 200 status code', () => {
       // -- application/x-www-form-urlencoded --
-      const phone = 'Body=240616151&From=8675309'; // wanderly_wagon 
+      const phone = 'Body=id: 240616151&From=8675309'; // wanderly_wagon 
 
       return superagent.post(`${__API_URL__}/sms-profile`)
         .send(phone)
@@ -29,7 +29,7 @@ describe('POST /sms-profile', () => {
     });
 
     test('testing that a 409 error will throw if phone number or member id is duplicated', () => {
-      const phone = 'Body=240616151&From=8675309'; // wanderly_wagon 
+      const phone = 'Body=id: 240616151&From=8675309'; // wanderly_wagon 
 
       return new smsProfile({
         meetupMemberId: 240616151,
@@ -47,7 +47,7 @@ describe('POST /sms-profile', () => {
     });
 
     test('testing that a 404 error will throw if phone number or member id are not provided', () => {
-      const phone = 'Body=240616151'; // wanderly_wagon 
+      const phone = 'Body=id: 240616151'; // wanderly_wagon 
 
       return superagent.post(`${__API_URL__}/sms-profile`)
         .send(phone)
@@ -72,7 +72,8 @@ describe('POST /sms-profile', () => {
             .send(getGroups)
             .then(response => {
               expect(response.status).toEqual(200);
-              expect(response.text).toContain('Your groups');
+              console.log(response.text);
+              expect(response.text).toContain('Your Groups');
             });
         });
     });

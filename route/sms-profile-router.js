@@ -18,57 +18,75 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
     return next(new httpErrors(404, 'Please provide a text message and a proper phone number'));
   }
 
-  const userInput = request.body.Body;
+  const userInput = request.body.Body.toLowerCase().trim();
   const phoneNumber = request.body.From;
+  log('info' , `userInput= ${userInput}`);
+  log('info' , `phoneNumber= ${phoneNumber}`);
 
   const isANumber = str => {
-    return /\d/.test(str);
+    return /id: ?(\d+)$/.test(str);
   };
 
   if (isANumber(userInput)) { // assume member id
-    const meetupMemberId = userInput;
-    const API_URL = `https://api.meetup.com/groups?member_id=${meetupMemberId}&key=${process.env.API_KEY}`;
-    const API_GET_MEMBER_PROFILE = `https://api.meetup.com/members/${meetupMemberId}?key=${process.env.API_KEY}&?fields=groups?%22`;
-    return superagent.get(API_URL)
-      .then(response => {
-        return response.body;
-      })
-      .then(meetupObject => {
-        return superagent.get(API_GET_MEMBER_PROFILE)
-          .then(memberAccount => {
-            meetupObject.name = memberAccount.body.name;
-            return meetupObject;
-          })
-          .then(newMeetupObject => {
-            const results = newMeetupObject.results;
-            const groups = [];
-    
-            results.forEach(result => {
-              groups.push(result.group_urlname);
+    smsProfile.findOne({phoneNumber})
+      .then(foundProfile => {
+        if (!foundProfile) {
+          const meetupMemberId = userInput.match(/id: ?(\d+)$/)[1];
+          const API_URL = `https://api.meetup.com/groups?member_id=${meetupMemberId}&key=${process.env.API_KEY}`;
+          const API_GET_MEMBER_PROFILE = `https://api.meetup.com/members/${meetupMemberId}?key=${process.env.API_KEY}&?fields=groups?%22`;
+          return superagent.get(API_URL)
+            .then(response => {
+              return response.body;
+            })
+            .then(meetupObject => {
+              return superagent.get(API_GET_MEMBER_PROFILE)
+                .then(memberAccount => {
+                  meetupObject.name = memberAccount.body.name;
+                  return meetupObject;
+                })
+                .then(newMeetupObject => {
+                  const results = newMeetupObject.results;
+                  const groups = [];
+          
+                  results.forEach(result => {
+                    groups.push(result.group_urlname);
+                  });
+          
+                  return new smsProfile ({
+                    meetupMemberId,
+                    meetupMemberName: newMeetupObject.name,
+                    phoneNumber,
+                    meetups: groups,
+                  }).save()
+                    .then(() => {
+                      twiml.message(`Congratulations, ${newMeetupObject.name}!
+You are all signed up for meetup notifications with #${phoneNumber}!
+You will receive a text notification 24 hours before any of your upcoming meetup events.
+Here's a list of commands, text:
+'my groups' - to see a list of your meetup groups
+'update me' - to get upcoming events
+'stop' - to opt out of text notifications`);
+                      response.writeHead(200, {'Content-Type': 'text/xml'});
+                      response.end(twiml.toString());
+                    })
+                    .catch(next);
+                })
+                .catch(next);
             });
-    
-            return new smsProfile ({
-              meetupMemberId,
-              meetupMemberName: newMeetupObject.name,
-              phoneNumber,
-              meetups: groups,
-            }).save()
-              .then(() => {
-                twiml.message(`Congratulations, ${newMeetupObject.name}! 
-                You are all signed up for meetup notifications with #${phoneNumber}
-                Here's a list of commands, text:
-                'my groups' - to see a list of your meetup groups
-                'update me' - to get upcoming events
-                'stop' - to opt out of text notifications`);
-                response.writeHead(200, {'Content-Type': 'text/xml'});
-                response.end(twiml.toString());
-              })
-              .catch(next);
-          })
-          .catch(next);
+
+        } else {
+          twiml.message(`Thanks, ${foundProfile.name}!
+You are already signed up
+Here's a list of commands:
+'my groups' - to see a list of your meetup groups
+'update me' - to get upcoming events
+'stop' - to opt out of text notifications`);
+          response.writeHead(409, {'Content-Type': 'text/xml'});
+          response.end(twiml.toString());
+        }
       });
 
-  } else if (userInput.toLowerCase() === 'update me') {
+  } else if (userInput === 'update me') {
     const ONE_WEEK = 604800000;
     smsProfile.find({phoneNumber})
       .then(smsProfile => {
@@ -79,6 +97,12 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
           return;
         }
 
+        if (!smsProfile[0].meetups[0]) {
+          twiml.message(`No Meetups listed with your account`);
+          response.writeHead(200, {'Content-Type': 'text/xml'});
+          response.end(twiml.toString());
+          return;
+        }
         return smsProfile[0].meetups.forEach(each => {
           superagent.get(`https://api.meetup.com/${each}/events?key=${process.env.API_KEY}`)
             .then(response => {
@@ -109,7 +133,7 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
       })
       .catch(next);
 
-  } else if (userInput.toLowerCase() === 'my groups') {
+  } else if (userInput === 'my groups') {
     smsProfile.find({phoneNumber})
       .then(smsProfile => {
         if (smsProfile.length === 0) {
@@ -118,15 +142,44 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
           response.end(twiml.toString());
           return;
         }
-        twiml.message(`Your groups: ${smsProfile[0].meetups}`);
+        if (!smsProfile[0].meetups) {
+          twiml.message(`You have no groups connected to your account`);
+          response.writeHead(200, {'Content-Type': 'text/xml'});
+          response.end(twiml.toString());
+          return;
+        }
+        let message = smsProfile[0].meetups.reduce((accumulator, eachMeetup) => {
+          return `${accumulator}${eachMeetup}\n\n`;
+        }, 'Your Groups:\n');
+        twiml.message(message);
         response.writeHead(200, {'Content-Type': 'text/xml'});
         response.end(twiml.toString());
+        return;
       })
       .catch(next);
 
   } else {
-    // category to be subscribed to
-    log('info', `User Input: ${userInput}`);
-    return;
+    smsProfile.findOne({phoneNumber})
+      .then(foundProfile => {
+        if (!foundProfile) {
+          twiml.message(`Welcome to meetup-trendly notifications!
+If you'd like to sign up, 
+please send a text message reply with your meetup user ID in the following format
+id: 123456789
+which can be found at https://www.meetup.com/account/`);
+          response.writeHead(200, {'Content-Type': 'text/xml'});
+          response.end(twiml.toString());
+          return;
+        } else {
+          twiml.message(`List of Commands:
+'my groups' - to see a list of your meetup groups
+'update me' - to get upcoming events
+'stop' - to opt out of text notifications`);
+          response.writeHead(200, {'Content-Type': 'text/xml'});
+          response.end(twiml.toString());
+          return;
+        }
+      })
+      .catch(next);
   }
 });
