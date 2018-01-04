@@ -24,14 +24,14 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
   log('info' , `phoneNumber= ${phoneNumber}`);
 
   const isANumber = str => {
-    return /id: ?(\d+)$/.test(str);
+    return /\d+$/.test(str);
   };
 
   if (isANumber(userInput)) { // assume member id
     smsProfile.findOne({phoneNumber})
       .then(foundProfile => {
         if (!foundProfile) {
-          const meetupMemberId = userInput.match(/id: ?(\d+)$/)[1];
+          const meetupMemberId = userInput.match(/\d+$/)[0];
           const API_URL = `https://api.meetup.com/groups?member_id=${meetupMemberId}&key=${process.env.API_KEY}`;
           const API_GET_MEMBER_PROFILE = `https://api.meetup.com/members/${meetupMemberId}?key=${process.env.API_KEY}&?fields=groups?%22`;
           return superagent.get(API_URL)
@@ -81,7 +81,7 @@ Here's a list of commands:
 'my groups' - to see a list of your meetup groups
 'update me' - to get upcoming events
 'stop' - to opt out of text notifications`);
-          response.writeHead(409, {'Content-Type': 'text/xml'});
+          response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
         }
       });
@@ -92,14 +92,14 @@ Here's a list of commands:
       .then(smsProfile => {
         if (smsProfile.length === 0) {
           twiml.message(`No profile found with that phone number`);
-          response.writeHead(404, {'Content-Type': 'text/xml'});
+          response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
         }
 
         if (!smsProfile[0].meetups[0]) {
           twiml.message(`No Meetups listed with your account`);
-          response.writeHead(404, {'Content-Type': 'text/xml'});
+          response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
         }
@@ -138,7 +138,7 @@ Here's a list of commands:
       .then(smsProfile => {
         if (smsProfile.length === 0) {
           twiml.message(`No profile found with that phone number`);
-          response.writeHead(404, {'Content-Type': 'text/xml'});
+          response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
         }
@@ -164,8 +164,8 @@ Here's a list of commands:
         if (!foundProfile) {
           twiml.message(`Welcome to meetup-trendly notifications!
 If you'd like to sign up, 
-please send a text message reply with your meetup user ID in the following format
-id: 123456789
+please send a text message reply with your meetup user ID:
+example: 123456789
 which can be found at https://www.meetup.com/account/`);
           response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
