@@ -99,7 +99,7 @@ Here's a list of commands:
 
         if (!smsProfile[0].meetups[0]) {
           twiml.message(`No Meetups listed with your account`);
-          response.writeHead(200, {'Content-Type': 'text/xml'});
+          response.writeHead(404, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
         }
