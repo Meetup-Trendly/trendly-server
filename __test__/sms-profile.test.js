@@ -18,7 +18,7 @@ describe('POST /sms-profile', () => {
   describe('text memberID to sign up', () => {
     test('testing that a text from a phone number should create an sms profile and return a 200 status code', () => {
       // -- application/x-www-form-urlencoded --
-      const phone = 'Body=240616151&From=8675309'; // wanderly_wagon 
+      const phone = 'Body=id: 240616151&From=8675309'; // wanderly_wagon 
 
       return superagent.post(`${__API_URL__}/sms-profile`)
         .send(phone)
@@ -29,7 +29,7 @@ describe('POST /sms-profile', () => {
     });
 
     test('testing that a 409 error will throw if phone number or member id is duplicated', () => {
-      const phone = 'Body=240616151&From=8675309'; // wanderly_wagon 
+      const phone = 'Body=id: 240616151&From=8675309'; // wanderly_wagon 
 
       return new smsProfile({
         meetupMemberId: 240616151,
@@ -47,7 +47,7 @@ describe('POST /sms-profile', () => {
     });
 
     test('testing that a 404 error will throw if phone number or member id are not provided', () => {
-      const phone = 'Body=240616151'; // wanderly_wagon 
+      const phone = 'Body=id: 240616151'; // wanderly_wagon 
 
       return superagent.post(`${__API_URL__}/sms-profile`)
         .send(phone)
@@ -72,8 +72,7 @@ describe('POST /sms-profile', () => {
             .send(getGroups)
             .then(response => {
               expect(response.status).toEqual(200);
-              console.log(response.text);
-              expect(response.text).toContain('Your groups');
+              expect(response.text).toContain('Your Groups');
             });
         });
     });
@@ -99,13 +98,40 @@ describe('POST /sms-profile', () => {
         meetupMemberId: 240616151,
         phoneNumber: '8675309',
         meetups: ['seattlejs', 'seattlejshackers'],
-        // meetups: ['PyDataDublin'], // PyDataDublin has no group meetups
       }).save()
         .then(() => {
           return superagent.post(`${__API_URL__}/sms-profile`)
             .send(updateMe)
             .then(response => {
               expect(response.status).toEqual(200);
+            });
+        });
+    });
+
+    test('-update me-responds with a 404 if no profile is found with the number', () => {
+      const updateMe = 'Body=Update me&From=8675309';
+
+      return superagent.post(`${__API_URL__}/sms-profile`)
+        .send(updateMe)
+        .then(Promise.reject)
+        .catch(error => {
+          expect(error.status).toEqual(404);
+        });
+    });
+
+    test('-update me-responds with a 404 if no meetups are found with the number', () => {
+      const updateMe = 'Body=Update me&From=8675309';
+
+      return new smsProfile({
+        meetupMemberId: 240616155, // this user has no groups
+        phoneNumber: '8675309',
+      }).save()
+        .then(() => {
+          return superagent.post(`${__API_URL__}/sms-profile`)
+            .send(updateMe)
+            .then(Promise.reject)
+            .catch(error => {
+              expect(error.status).toEqual(404);
             });
         });
     });
