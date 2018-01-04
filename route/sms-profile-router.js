@@ -28,46 +28,62 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
   };
 
   if (isANumber(userInput)) { // assume member id
-    const meetupMemberId = userInput.match(/id: ?(\d+)$/)[1];
-    const API_URL = `https://api.meetup.com/groups?member_id=${meetupMemberId}&key=${process.env.API_KEY}`;
-    const API_GET_MEMBER_PROFILE = `https://api.meetup.com/members/${meetupMemberId}?key=${process.env.API_KEY}&?fields=groups?%22`;
-    return superagent.get(API_URL)
-      .then(response => {
-        return response.body;
-      })
-      .then(meetupObject => {
-        return superagent.get(API_GET_MEMBER_PROFILE)
-          .then(memberAccount => {
-            meetupObject.name = memberAccount.body.name;
-            return meetupObject;
-          })
-          .then(newMeetupObject => {
-            const results = newMeetupObject.results;
-            const groups = [];
-    
-            results.forEach(result => {
-              groups.push(result.group_urlname);
-            });
-    
-            return new smsProfile ({
-              meetupMemberId,
-              meetupMemberName: newMeetupObject.name,
-              phoneNumber,
-              meetups: groups,
-            }).save()
-              .then(() => {
-                twiml.message(`Congratulations, ${newMeetupObject.name}!
-You are all signed up for meetup notifications with #${phoneNumber}
+    smsProfile.findOne({phoneNumber})
+      .then(foundProfile => {
+        if (!foundProfile) {
+          const meetupMemberId = userInput.match(/id: ?(\d+)$/)[1];
+          const API_URL = `https://api.meetup.com/groups?member_id=${meetupMemberId}&key=${process.env.API_KEY}`;
+          const API_GET_MEMBER_PROFILE = `https://api.meetup.com/members/${meetupMemberId}?key=${process.env.API_KEY}&?fields=groups?%22`;
+          return superagent.get(API_URL)
+            .then(response => {
+              return response.body;
+            })
+            .then(meetupObject => {
+              return superagent.get(API_GET_MEMBER_PROFILE)
+                .then(memberAccount => {
+                  meetupObject.name = memberAccount.body.name;
+                  return meetupObject;
+                })
+                .then(newMeetupObject => {
+                  const results = newMeetupObject.results;
+                  const groups = [];
+          
+                  results.forEach(result => {
+                    groups.push(result.group_urlname);
+                  });
+          
+                  return new smsProfile ({
+                    meetupMemberId,
+                    meetupMemberName: newMeetupObject.name,
+                    phoneNumber,
+                    meetups: groups,
+                  }).save()
+                    .then(() => {
+                      twiml.message(`Congratulations, ${newMeetupObject.name}!
+You are all signed up for meetup notifications with #${phoneNumber}!
+You will receive a text notification 24 hours before any of your upcoming meetup events.
 Here's a list of commands, text:
 'my groups' - to see a list of your meetup groups
 'update me' - to get upcoming events
 'stop' - to opt out of text notifications`);
-                response.writeHead(200, {'Content-Type': 'text/xml'});
-                response.end(twiml.toString());
-              })
-              .catch(next);
-          })
-          .catch(next);
+                      response.writeHead(200, {'Content-Type': 'text/xml'});
+                      response.end(twiml.toString());
+                    })
+                    .catch(next);
+                })
+                .catch(next);
+            });
+
+        } else {
+          twiml.message(`Thanks, ${foundProfile.name}!
+You are already signed up
+Here's a list of commands:
+'my groups' - to see a list of your meetup groups
+'update me' - to get upcoming events
+'stop' - to opt out of text notifications`);
+          response.writeHead(409, {'Content-Type': 'text/xml'});
+          response.end(twiml.toString());
+        }
       });
 
   } else if (userInput === 'update me') {
@@ -133,8 +149,8 @@ Here's a list of commands, text:
           return;
         }
         let message = smsProfile[0].meetups.reduce((accumulator, eachMeetup) => {
-          return `${accumulator}${eachMeetup}\n`;
-        }, '');
+          return `${accumulator}${eachMeetup}\n\n`;
+        }, 'Your Groups:\n');
         twiml.message(message);
         response.writeHead(200, {'Content-Type': 'text/xml'});
         response.end(twiml.toString());
@@ -150,7 +166,7 @@ Here's a list of commands, text:
 If you'd like to sign up, 
 please send a text message reply with your meetup user ID in the following format
 id: 123456789
-which can be found at (https://www.meetup.com/account/)`);
+which can be found at https://www.meetup.com/account/`);
           response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
