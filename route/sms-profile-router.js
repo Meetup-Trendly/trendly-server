@@ -81,6 +81,12 @@ Here's a list of commands, text:
           return;
         }
 
+        if (!smsProfile[0].meetups[0]) {
+          twiml.message(`No Meetups listed with your account`);
+          response.writeHead(200, {'Content-Type': 'text/xml'});
+          response.end(twiml.toString());
+          return;
+        }
         return smsProfile[0].meetups.forEach(each => {
           superagent.get(`https://api.meetup.com/${each}/events?key=${process.env.API_KEY}`)
             .then(response => {
@@ -120,9 +126,16 @@ Here's a list of commands, text:
           response.end(twiml.toString());
           return;
         }
+        if (!smsProfile[0].meetups) {
+          twiml.message(`You have no groups connected to your account`);
+          response.writeHead(200, {'Content-Type': 'text/xml'});
+          response.end(twiml.toString());
+          return;
+        }
         twiml.message(`Your groups: ${smsProfile[0].meetups}`);
         response.writeHead(200, {'Content-Type': 'text/xml'});
         response.end(twiml.toString());
+        return;
       })
       .catch(next);
 
