@@ -77,11 +77,18 @@ The server module is creating an http server, defining server-on behavior and ex
 
 The server module requires in express, mongoose, logger, fs-extra, dotenv, logger-middleware, error-middleware, account-router.js, profile-router.js and the sms-profile-router.js file. The server.start and stop methods return a new Promise with resolve and reject parameters. The start method contains an app.listen function that listens for the server start. The server.stop method has an httpServer.close function that turns the server off by setting the isServerOn variable to false.
 
+##### Scheduler Module
+
+The `scheduler.js` file requires in node-schedule, the sms-profile model, superagent, the sms.js file, and the winston logger file. Inside of this module. There is a method called `runEventsNextDay()` which sends out an sms notification at noon, if the user has any events coming up within the next 24 hours. The file also contains a method called `runUpdateAllGroups()` which checks the meetup api everyday at 9am for updates on every user's meetup groups, if a user has joined a new meetup group recently it will be added to the notification list.
+
+##### SMS Module
+The `sms.js` file requires in the twilio accountSID and authToken environment variables, as well as twilio. This module contains a method called `sendMessage()` which accepts a specified message and phoneNumber and creates the message we want to send back to the user.
+
 #### Route Module
 
 ##### `account-router.js`
 
-`account-router.js` requires in the Router object from express, the jsonParser(body-parser), http-errors, the account.js model, and basic-auth-middleware.js. Inside the module, there is a function declared for `accountRouter.get` with the route `/login`. There is a function declared for `authRouter.post` with the route `/signup`. If a username, email, or password are not provided, then the user will receive a 400 error notifying them that those pieces of information are required. Otherwise, if all pieces of information are provided - then the method `createToken()` is called to send a response with the token. If all information is provided, then the `Account.create` method is called and will create an account with a username, email and password.
+`account-router.js` requires in the Router object from express, the jsonParser(body-parser), http-errors, the account.js model, and basic-auth-middleware.js. Inside the module, there is a function declared for `accountRouter.get` with the route `/login`. There is a function declared for `authRouter.post` with the route `/signup`. If a username, email, or password are not provided, then the user will receive a 400 error notifying them that those pieces of information are required. Otherwise, if all pieces of information are provided - then the method `createToken()` is called to send a response with the token. If all information is provided, then the `Account.create()` method is called and will create an account with a username, email and password.
 
 ##### `profile-router.js`
 
@@ -96,7 +103,7 @@ The server module requires in express, mongoose, logger, fs-extra, dotenv, logge
 
 ##### `account.js`
 
-`account.js` requires in mongoose, crypto (which generates random strings), bcrypt (for hash passwords), http-errors, and jsonwebtoken. The account model includes the parameters: passwordHash, email, username, tokenSeed, and dateCreated. The account model has the methods: `accountSchema.methods.verifyPassword()` and `accountSchema.methods.createToken()` which are for authentication and token creation. There is also an `Account.create` method with the parameters: username, email, and password that actually creates the account.
+`account.js` requires in mongoose, crypto (which generates random strings), bcrypt (for hash passwords), http-errors, and jsonwebtoken. The account model includes the parameters: passwordHash, email, username, tokenSeed, and dateCreated. The account model has the methods: `accountSchema.methods.verifyPassword()` and `accountSchema.methods.createToken()` which are for authentication and token creation. There is also an `Account.create()` method with the parameters: username, email, and password that actually creates the account.
 
 ##### `profile.js`
 
