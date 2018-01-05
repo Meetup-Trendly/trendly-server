@@ -75,7 +75,7 @@ Here's a list of commands, text:
             });
 
         } else {
-          twiml.message(`Thanks, ${foundProfile.name}!
+          twiml.message(`Thanks, ${foundProfile.meetupMemberName}!
 You are already signed up
 Here's a list of commands:
 'my groups' - to see a list of your meetup groups
@@ -135,20 +135,20 @@ Here's a list of commands:
 
   } else if (userInput === 'my groups') {
     smsProfile.find({phoneNumber})
-      .then(smsProfile => {
-        if (smsProfile.length === 0) {
+      .then(foundSMSProfile => {
+        if (foundSMSProfile.length === 0) {
           twiml.message(`No profile found with that phone number`);
           response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
         }
-        if (!smsProfile[0].meetups) {
+        if (foundSMSProfile[0].meetups.length === 0) {
           twiml.message(`You have no groups connected to your account`);
           response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
         }
-        let message = smsProfile[0].meetups.reduce((accumulator, eachMeetup) => {
+        let message = foundSMSProfile[0].meetups.reduce((accumulator, eachMeetup) => {
           return `${accumulator}${eachMeetup}\n\n`;
         }, 'Your Groups:\n');
         twiml.message(message);

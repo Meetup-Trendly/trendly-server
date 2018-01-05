@@ -11,7 +11,7 @@ const __API_URL__ = `http://localhost:${process.env.PORT}`;
 describe('POST /sms-profile', () => {
   beforeAll(server.start);
   afterAll(server.stop);
-  afterEach(() => {
+  beforeEach(() => {
     return smsProfile.remove({});
   });
 
@@ -89,6 +89,24 @@ describe('POST /sms-profile', () => {
     });
   });
 
+  test('testing that the -my groups- command replies to the user if they have no groups connected to the account', () => {
+    const getGroups = 'Body=My groups&From=8675309';
+
+    return new smsProfile({
+      meetupMemberId: 240616151,
+      phoneNumber: 8675309,
+      meetups: [],
+    }).save()
+      .then(() => {
+        return superagent.post(`${__API_URL__}/sms-profile`)
+          .send(getGroups)
+          .then(response => {
+            expect(response.status).toEqual(200);
+            expect(response.text).toContain('You have no groups connected to your account');
+          });
+      });
+  });
+
   describe('text -update me- command to get a list of meetups within a week\'s time', () => {
     test('testing that the -update me- command returns a list of meetups that occur within a week and a 200 status code', () => {
       const updateMe = 'Body=Update me&From=8675309';
@@ -131,6 +149,35 @@ describe('POST /sms-profile', () => {
             .then(response => {
               expect(response.status).toEqual(200);
               expect(response.text).toContain('No Meetups listed with your account');
+            });
+        });
+    });
+  });
+
+  describe('non-sms commands', () => {
+    test('any non-sms command sent from the user without being signed up will return a response of how to sign up', () => {
+      const updateMe = 'Body=hi&From=8675309';
+      return superagent.post(`${__API_URL__}/sms-profile`)
+        .send(updateMe)
+        .then(response => {
+          expect(response.status).toEqual(200);
+          expect(response.text).toContain('If you\'d like to sign up');
+        });
+    });
+
+    test('any non-sms command sent from the user while being signed up will return a list of commands to the user', () => {
+      const updateMe = 'Body=hi&From=8675309';
+
+      return new smsProfile({
+        meetupMemberId: 240616155, // this user has no groups
+        phoneNumber: '8675309',
+      }).save()
+        .then(() => {
+          return superagent.post(`${__API_URL__}/sms-profile`)
+            .send(updateMe)
+            .then(response => {
+              expect(response.status).toEqual(200);
+              expect(response.text).toContain('List of Commands:');
             });
         });
     });
