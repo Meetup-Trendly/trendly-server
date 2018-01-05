@@ -142,11 +142,11 @@ The error-middleware module handles error messages for a variety of different us
 * HTTP errors include the following logs: 
 
  ``` 
-  logger.log('info','__ERROR_MIDDLEWARE__');
-  logger.log('info',error);
+  log('info','__ERROR_MIDDLEWARE__');
+  log('info',error);
 
   if(error.status){
-    logger.log('info',Responding with a ${error.status} status and message: ${error.message});
+    log('info',Responding with a ${error.status} status and message: ${error.message});
     return response.sendStatus(error.status);
   }
   ```
@@ -154,22 +154,22 @@ The error-middleware module handles error messages for a variety of different us
 
 ```
   if(message.includes('validation failed')) {
-    logger.log('info','Responding with a 400 status code');
+    log('info','Responding with a 400 status code');
     return response.sendStatus(400);
   }
 
   if(message.includes('duplicate key')) {
-    logger.log('info','Responding with a 409 status code');
+    log('info','Responding with a 409 status code');
     return response.sendStatus(409);
   }
 
   if(message.includes('objectid failed')) {
-    logger.log('info','Responding with a 404 status code');
+    log('info','Responding with a 404 status code');
     return response.sendStatus(404);
   }
 
   if(message.includes('unauthorized')) {
-    logger.log('info','Responding with a 401 status code');
+    log('info','Responding with a 401 status code');
     return response.sendStatus(401);
   }
 ```
@@ -177,8 +177,8 @@ The error-middleware module handles error messages for a variety of different us
 * If there is an error that doesn't match the above, then:
 
 ```
-  logger.log('info', 'Responding with a 500 status code');
-  logger.log('info', error);
+  log('info', 'Responding with a 500 status code');
+  log('info', error);
   return response.sendStatus(500);
 ```
 
@@ -205,9 +205,7 @@ Standard JavaScript with ES6
 * Node.js
 * Jest
 * Eslint
-* Faker
 * Superagent
-* MongoDB
 * Mongoose
 * Winston
 * Express
@@ -219,18 +217,18 @@ Standard JavaScript with ES6
 * jsonwebtoken
 * fs-extra
 * multer
-* aws-sdk
-* aws-sdk-mock
-* Amazon Web Services
-* TravisCI
-* Heroku
 * node-schedule
 
 ---
 
 ### Credits
 
-* Code Fellows / Vinicio Vladimir Sanchez Trejo
+* Code Fellows
+* Heroku - for deployment
+* Meetup - for api reference
+* Travis.ci - for continuous integration
+* MongoDB - for persistence
+* Twilio - for sms interface
 
 ---
 

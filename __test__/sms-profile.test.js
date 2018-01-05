@@ -14,6 +14,9 @@ describe('POST /sms-profile', () => {
   beforeEach(() => {
     return smsProfile.remove({});
   });
+  afterEach(() => {
+    return smsProfile.remove({});
+  });
 
   describe('text memberID to sign up', () => {
     test('testing that a text from a phone number should create an sms profile and return a 200 status code', () => {
@@ -84,7 +87,7 @@ describe('POST /sms-profile', () => {
         .send(getGroups)
         .then(response => {
           expect(response.status).toEqual(200);
-          expect(response.text).toContain('No profile found with that phone number');
+          expect(response.text).toContain('We are unable to send your groups');
         });
     });
   });
@@ -132,7 +135,7 @@ describe('POST /sms-profile', () => {
         .send(updateMe)
         .then(reponse => {
           expect(reponse.status).toEqual(200);
-          expect(reponse.text).toContain('No profile found with that phone number');
+          expect(reponse.text).toContain('We are unable to send you an update');
         });
     });
 
