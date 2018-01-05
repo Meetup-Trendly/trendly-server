@@ -11,14 +11,14 @@ const __API_URL__ = `http://localhost:${process.env.PORT}`;
 describe('POST /sms-profile', () => {
   beforeAll(server.start);
   afterAll(server.stop);
-  afterEach(() => {
+  beforeEach(() => {
     return smsProfile.remove({});
   });
 
   describe('text memberID to sign up', () => {
     test('testing that a text from a phone number should create an sms profile and return a 200 status code', () => {
       // -- application/x-www-form-urlencoded --
-      const phone = 'Body=id: 240616151&From=8675309'; // wanderly_wagon 
+      const phone = 'Body=240616151&From=8675309'; // wanderly_wagon 
 
       return superagent.post(`${__API_URL__}/sms-profile`)
         .send(phone)
@@ -28,8 +28,8 @@ describe('POST /sms-profile', () => {
         });
     });
 
-    test('testing that a 409 error will throw if phone number or member id is duplicated', () => {
-      const phone = 'Body=id: 240616151&From=8675309'; // wanderly_wagon 
+    test('testing that response will be sent to the user if a duplicate phone number is sent', () => {
+      const phone = 'Body=240616151&From=8675309'; // wanderly_wagon 
 
       return new smsProfile({
         meetupMemberId: 240616151,
@@ -39,15 +39,15 @@ describe('POST /sms-profile', () => {
         .then(() => {
           return superagent.post(`${__API_URL__}/sms-profile`)
             .send(phone)
-            .then(Promise.reject)
-            .catch(response => {
-              expect(response.status).toEqual(409);
+            .then(response => {
+              expect(response.status).toEqual(200);
+              expect(response.text).toContain('You are already signed up');
             });
         });
     });
 
-    test('testing that a 404 error will throw if phone number or member id are not provided', () => {
-      const phone = 'Body=id: 240616151'; // wanderly_wagon 
+    test('expect a 404 status code if message is not sent from a phone number', () => {
+      const phone = 'Body=240616151'; // wanderly_wagon 
 
       return superagent.post(`${__API_URL__}/sms-profile`)
         .send(phone)
@@ -77,17 +77,34 @@ describe('POST /sms-profile', () => {
         });
     });
 
-    test('testing that a 404 error will be thrown if there is no stored sms profile for the current phone number', () => {
+    test('testing that a response will be sent to the user if there is no stored sms profile for the current phone number', () => {
       const getGroups = 'Body=My groups&From=8675309';
 
       return superagent.post(`${__API_URL__}/sms-profile`)
         .send(getGroups)
-        .then(Promise.reject)
-        .catch(error => {
-          expect(error.status).toEqual(404);
-          expect(error.response.res.text).toContain('No profile found with that phone number');
+        .then(response => {
+          expect(response.status).toEqual(200);
+          expect(response.text).toContain('No profile found with that phone number');
         });
     });
+  });
+
+  test('testing that the -my groups- command replies to the user if they have no groups connected to the account', () => {
+    const getGroups = 'Body=My groups&From=8675309';
+
+    return new smsProfile({
+      meetupMemberId: 240616151,
+      phoneNumber: 8675309,
+      meetups: [],
+    }).save()
+      .then(() => {
+        return superagent.post(`${__API_URL__}/sms-profile`)
+          .send(getGroups)
+          .then(response => {
+            expect(response.status).toEqual(200);
+            expect(response.text).toContain('You have no groups connected to your account');
+          });
+      });
   });
 
   describe('text -update me- command to get a list of meetups within a week\'s time', () => {
@@ -108,18 +125,18 @@ describe('POST /sms-profile', () => {
         });
     });
 
-    test('-update me-responds with a 404 if no profile is found with the number', () => {
+    test('-update me- sends a response to the user if no profile is found with the number', () => {
       const updateMe = 'Body=Update me&From=8675309';
 
       return superagent.post(`${__API_URL__}/sms-profile`)
         .send(updateMe)
-        .then(Promise.reject)
-        .catch(error => {
-          expect(error.status).toEqual(404);
+        .then(reponse => {
+          expect(reponse.status).toEqual(200);
+          expect(reponse.text).toContain('No profile found with that phone number');
         });
     });
 
-    test('-update me-responds with a 404 if no meetups are found with the number', () => {
+    test('-update me- sends a response to the user if no meetups are found with their number', () => {
       const updateMe = 'Body=Update me&From=8675309';
 
       return new smsProfile({
@@ -129,9 +146,38 @@ describe('POST /sms-profile', () => {
         .then(() => {
           return superagent.post(`${__API_URL__}/sms-profile`)
             .send(updateMe)
-            .then(Promise.reject)
-            .catch(error => {
-              expect(error.status).toEqual(404);
+            .then(response => {
+              expect(response.status).toEqual(200);
+              expect(response.text).toContain('No Meetups listed with your account');
+            });
+        });
+    });
+  });
+
+  describe('non-sms commands', () => {
+    test('any non-sms command sent from the user without being signed up will return a response of how to sign up', () => {
+      const updateMe = 'Body=hi&From=8675309';
+      return superagent.post(`${__API_URL__}/sms-profile`)
+        .send(updateMe)
+        .then(response => {
+          expect(response.status).toEqual(200);
+          expect(response.text).toContain('If you\'d like to sign up');
+        });
+    });
+
+    test('any non-sms command sent from the user while being signed up will return a list of commands to the user', () => {
+      const updateMe = 'Body=hi&From=8675309';
+
+      return new smsProfile({
+        meetupMemberId: 240616155, // this user has no groups
+        phoneNumber: '8675309',
+      }).save()
+        .then(() => {
+          return superagent.post(`${__API_URL__}/sms-profile`)
+            .send(updateMe)
+            .then(response => {
+              expect(response.status).toEqual(200);
+              expect(response.text).toContain('List of Commands:');
             });
         });
     });

@@ -5,7 +5,6 @@ const jsonParser = require('body-parser').json();
 const Account = require('../model/account');
 const httpError = require('http-errors');
 const basicAuthMiddleware = require('../lib/middleware/basic-auth-middleware');
-// const log = require('../lib/logger');
 
 const accountRouter = module.exports = new Router();
 

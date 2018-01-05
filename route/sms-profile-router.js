@@ -24,14 +24,14 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
   log('info' , `phoneNumber= ${phoneNumber}`);
 
   const isANumber = str => {
-    return /id: ?(\d+)$/.test(str);
+    return /\d+$/.test(str);
   };
 
   if (isANumber(userInput)) { // assume member id
     smsProfile.findOne({phoneNumber})
       .then(foundProfile => {
         if (!foundProfile) {
-          const meetupMemberId = userInput.match(/id: ?(\d+)$/)[1];
+          const meetupMemberId = userInput.match(/\d+$/)[0];
           const API_URL = `https://api.meetup.com/groups?member_id=${meetupMemberId}&key=${process.env.API_KEY}`;
           const API_GET_MEMBER_PROFILE = `https://api.meetup.com/members/${meetupMemberId}?key=${process.env.API_KEY}&?fields=groups?%22`;
           return superagent.get(API_URL)
@@ -59,7 +59,8 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
                     meetups: groups,
                   }).save()
                     .then(() => {
-                      twiml.message(`Congratulations, ${newMeetupObject.name}!
+                      twiml.message(`
+Congratulations, ${newMeetupObject.name}!
 You are all signed up for meetup notifications with #${phoneNumber}!
 You will receive a text notification 24 hours before any of your upcoming meetup events.
 Here's a list of commands, text:
@@ -75,13 +76,14 @@ Here's a list of commands, text:
             });
 
         } else {
-          twiml.message(`Thanks, ${foundProfile.name}!
+          twiml.message(`
+Thanks, ${foundProfile.meetupMemberName}!
 You are already signed up
 Here's a list of commands:
 'my groups' - to see a list of your meetup groups
 'update me' - to get upcoming events
 'stop' - to opt out of text notifications`);
-          response.writeHead(409, {'Content-Type': 'text/xml'});
+          response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
         }
       });
@@ -92,14 +94,14 @@ Here's a list of commands:
       .then(smsProfile => {
         if (smsProfile.length === 0) {
           twiml.message(`No profile found with that phone number`);
-          response.writeHead(404, {'Content-Type': 'text/xml'});
+          response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
         }
 
         if (!smsProfile[0].meetups[0]) {
           twiml.message(`No Meetups listed with your account`);
-          response.writeHead(404, {'Content-Type': 'text/xml'});
+          response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
         }
@@ -135,20 +137,20 @@ Here's a list of commands:
 
   } else if (userInput === 'my groups') {
     smsProfile.find({phoneNumber})
-      .then(smsProfile => {
-        if (smsProfile.length === 0) {
+      .then(foundSMSProfile => {
+        if (foundSMSProfile.length === 0) {
           twiml.message(`No profile found with that phone number`);
-          response.writeHead(404, {'Content-Type': 'text/xml'});
+          response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
         }
-        if (!smsProfile[0].meetups) {
+        if (foundSMSProfile[0].meetups.length === 0) {
           twiml.message(`You have no groups connected to your account`);
           response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
         }
-        let message = smsProfile[0].meetups.reduce((accumulator, eachMeetup) => {
+        let message = foundSMSProfile[0].meetups.reduce((accumulator, eachMeetup) => {
           return `${accumulator}${eachMeetup}\n\n`;
         }, 'Your Groups:\n');
         twiml.message(message);
@@ -162,16 +164,18 @@ Here's a list of commands:
     smsProfile.findOne({phoneNumber})
       .then(foundProfile => {
         if (!foundProfile) {
-          twiml.message(`Welcome to meetup-trendly notifications!
+          twiml.message(`
+Welcome to meetup-trendly notifications!
 If you'd like to sign up, 
-please send a text message reply with your meetup user ID in the following format
-id: 123456789
+please send a text message reply with your meetup user ID:
+example: 123456789
 which can be found at https://www.meetup.com/account/`);
           response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
         } else {
-          twiml.message(`List of Commands:
+          twiml.message(`
+List of Commands:
 'my groups' - to see a list of your meetup groups
 'update me' - to get upcoming events
 'stop' - to opt out of text notifications`);
