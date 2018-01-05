@@ -4,7 +4,6 @@ require('dotenv').config();
 
 const server = require('../lib/server');
 const smsProfile = require('../model/sms-profile');
-const scheduler = require('../lib/scheduler');
 
 describe('scheduler.js', () => {
   beforeAll(server.start);
@@ -28,22 +27,5 @@ describe('scheduler.js', () => {
             });
         });
     });
-
-    // describe('testing that the saved sms profile is updated', () => {
-    //   beforeAll(() => {
-    //     scheduler.updateAllGroups();
-    //   });
-
-    //   test('testing that the saved sms profile is updated', () => {
-    //     return smsProfile.findOne({phoneNumber: '8675309'})
-    //       .then(foundSMSProfile => {
-    //         setTimeout(() => {
-    //           console.log(foundSMSProfile);
-    //           expect(foundSMSProfile.meetups).not.toHaveLength(0);
-    //           expect(true).toBeFalsy();
-    //         }, 5000);
-    //       });
-    //   });
-    // });
   });
 });

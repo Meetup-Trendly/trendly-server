@@ -59,7 +59,8 @@ smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
                     meetups: groups,
                   }).save()
                     .then(() => {
-                      twiml.message(`Congratulations, ${newMeetupObject.name}!
+                      twiml.message(`
+Congratulations, ${newMeetupObject.name}!
 You are all signed up for meetup notifications with #${phoneNumber}!
 You will receive a text notification 24 hours before any of your upcoming meetup events.
 Here's a list of commands, text:
@@ -75,7 +76,8 @@ Here's a list of commands, text:
             });
 
         } else {
-          twiml.message(`Thanks, ${foundProfile.meetupMemberName}!
+          twiml.message(`
+Thanks, ${foundProfile.meetupMemberName}!
 You are already signed up
 Here's a list of commands:
 'my groups' - to see a list of your meetup groups
@@ -162,7 +164,8 @@ Here's a list of commands:
     smsProfile.findOne({phoneNumber})
       .then(foundProfile => {
         if (!foundProfile) {
-          twiml.message(`Welcome to meetup-trendly notifications!
+          twiml.message(`
+Welcome to meetup-trendly notifications!
 If you'd like to sign up, 
 please send a text message reply with your meetup user ID:
 example: 123456789
@@ -171,7 +174,8 @@ which can be found at https://www.meetup.com/account/`);
           response.end(twiml.toString());
           return;
         } else {
-          twiml.message(`List of Commands:
+          twiml.message(`
+List of Commands:
 'my groups' - to see a list of your meetup groups
 'update me' - to get upcoming events
 'stop' - to opt out of text notifications`);
