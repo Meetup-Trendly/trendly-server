@@ -1,0 +1,46 @@
+{
+  "name": "trendly-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest -i --coverage || exit 0",
+    "lint": "eslint ./",
+    "dbon": "mkdir -p ./db && mongod --dbpath ./db",
+    "dboff": "killall mongod",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Google-Trendly/trendly-server.git"
+  },
+  "author": "Catherine Looper, Matthew LeBlanc, Cameron Moorehead, Dalton Carr",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Google-Trendly/trendly-server/issues"
+  },
+  "homepage": "https://github.com/Google-Trendly/trendly-server#readme",
+  "devDependencies": {
+    "eslint": "^4.14.0",
+    "jest": "^22.0.4"
+  },
+  "dependencies": {
+    "aws-sdk-mock": "^1.7.0",
+    "bcrypt": "^1.0.3",
+    "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
+    "crypto": "^1.0.1",
+    "dotenv": "^4.0.0",
+    "express": "^4.16.2",
+    "faker": "^4.1.0",
+    "fs-extra": "^5.0.0",
+    "http-errors": "^1.6.2",
+    "jsonwebtoken": "^8.1.0",
+    "mongoose": "^5.0.0-rc0",
+    "multer": "^1.3.0",
+    "node-schedule": "^1.2.5",
+    "superagent": "^3.8.2",
+    "twilio": "^3.11.0",
+    "winston": "^2.4.0"
+  }
+}
