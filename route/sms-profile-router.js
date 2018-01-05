@@ -13,6 +13,8 @@ const log = require('../lib/logger');
 const smsProfileRouter = module.exports = new Router();
 
 smsProfileRouter.post('/sms-profile', bodyParser, (request, response, next) => {
+  logText(request);
+  
   const twiml = new MessagingResponse();
   if(!request.body.Body || !request.body.From) {
     return next(new httpErrors(404, 'Please provide a text message and a proper phone number'));
@@ -93,7 +95,10 @@ Here's a list of commands:
     smsProfile.find({phoneNumber})
       .then(smsProfile => {
         if (smsProfile.length === 0) {
-          twiml.message(`No profile found with that phone number`);
+          twiml.message(`
+We are unable to send you an update, please first create an account by sending a text message reply with your meetup user ID:
+example: 123456789
+which can be found at https://www.meetup.com/account/`);
           response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
@@ -139,7 +144,10 @@ Here's a list of commands:
     smsProfile.find({phoneNumber})
       .then(foundSMSProfile => {
         if (foundSMSProfile.length === 0) {
-          twiml.message(`No profile found with that phone number`);
+          twiml.message(`
+We are unable to send your groups, please first create an account by sending a text message reply with your meetup user ID:
+example: 123456789
+which can be found at https://www.meetup.com/account/`);
           response.writeHead(200, {'Content-Type': 'text/xml'});
           response.end(twiml.toString());
           return;
@@ -187,3 +195,9 @@ List of Commands:
       .catch(next);
   }
 });
+
+function logText(request) {
+  const text = request.body.Body;
+  const number = request.body.From;
+  log('verbose', `From: ${number} Text= ${text}`);
+}
