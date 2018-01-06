@@ -4,16 +4,18 @@ require('dotenv').config();
 
 const server = require('../lib/server');
 const smsProfile = require('../model/sms-profile');
+const scheduler = require('../lib/scheduler');
 
 describe('scheduler.js', () => {
   beforeAll(server.start);
   afterAll(server.stop);
-
+  
   describe('updating all groups', () => {
-    beforeAll(() => {
+    beforeEach(() => {
       return smsProfile.remove({});
     });
-    test('testing that smsProfile is being saved to the database', () => {
+
+    test('testing node-scheduler "updateAllGroups" updates sms profiles\' groups', () => {
       return new smsProfile({
         meetupMemberId: 240616151,
         meetupMemberName: 'wanderly_wagon',
@@ -21,9 +23,11 @@ describe('scheduler.js', () => {
         meetups: [],
       }).save()
         .then(() => {
-          smsProfile.findOne({phoneNumber: '8675309'})
-            .then(foundSMSProfile => {
-              expect(foundSMSProfile.meetups).toHaveLength(0);
+          return scheduler.updateAllGroups()
+            .then(() => {
+              return smsProfile.findOne({phoneNumber: '8675309'}, (error, foundAccount) => {
+                expect(foundAccount.meetups).not.toHaveLength(0);
+              });
             });
         });
     });
