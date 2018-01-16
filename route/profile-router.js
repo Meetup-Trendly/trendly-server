@@ -14,7 +14,11 @@ profileRouter.post('/profiles', bearerAuthMiddleware, jsonParser, (request, resp
   if(!request.account && !request.phoneNumber)
     return next(new httpErrors(404, '__ERROR__ no account, or phonenumber given'));
 
-  return superagent.get(`https://api.meetup.com/members/${request.body.meetupMemberId}?key=${process.env.API_KEY}&?fields=groups?%22`)
+  // REVIEW: break this line up
+  let memberId = request.body.memberId;
+  let key = process.env.API_KEY
+  let url = `https://api.meetup.com/members/${memberId}?key=${key}&?fields=groups?%22`
+  return superagent.get(url)
     .then(response => {
       return response.body;
     })
